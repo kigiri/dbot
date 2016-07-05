@@ -17,18 +17,9 @@ const discord = require('discord.js')
 // tldr.updateCache = 
 
 const config = {
-  botToken: 'MTk5OTM5MDk3MTQwMjY0OTYx.Cl1_Sw.KLm2QHRZrqorokHkSsUzbbyZAcU'
+  botToken: 'MTk5OTM5MDk3MTQwMjY0OTYx.Cl1_Sw.KLm2QHRZrqorokHkSsUzbbyZAcU',
+  self: '199939097140264961',
 }
-
-// connecting and playing a file
-// client.joinVoiceChannel(voiceChannel).then(function (connection) {
-//   connection.playFile(fileName)
-// })
-
-// // accessing an existing connection
-// if (client.voiceConnection) {
-//   client.voiceConnection.stopPlaying()
-// }
 
 const bot = new discord.Client()
 bot.loginWithToken(config.botToken)
@@ -39,25 +30,55 @@ const getVoiceConnection = voiceChannel =>
   voices[voiceChannel]
   || (voices[voiceChannel] = bot.joinVoiceChannel(voiceChannel))
 
-const actions = {
-  wesh: msg => bot.reply(msg, 'wesh'),
-  help: msg => {
-    const voiceChannel = msg.author.voiceChannel
-    if (!voiceChannel) return bot.reply(msg, 'balek')
-    getVoiceConnection(voiceChannel.id)
-      .then(connection => connection.playFile(pathJoin(__dirname, 'balek.mp3')))
-      .catch(err => bot.reply(msg, err))
-  },
+const not = fn => v => !fn(v)
+
+const filters = {
+  self: msg => msg.author.id === config.self,
+  userVoice: msg => msg.author.voiceChannel,
+  voice: msg => bot.voiceConnection,
 }
 
-let i = 0
+const actions = {
+  wesh: { action: msg => bot.reply(msg, 'wesh') },
+  yo: { action: msg => bot.reply(msg, 'bien ou bien ?') },
+  stop: {
+    if: [ filters.voice, not(filters.self) ],
+    action: msg => bot.voiceConnection.stopPlaying(),
+  },
+  volume: {
+    if: [ filters.voice, not(filters.self) ],
+    action: (msg, args) => bot.voiceConnection.setVolume(parseFloat(args)),
+  },
+  help: {
+    if: [ filters.userVoice, not(filters.self) ],
+    action: msg => getVoiceConnection(msg.author.voiceChannel)
+      .then(channel => channel.playFile(pathJoin(__dirname, 'balek.mp3')))
+      .catch(err => bot.reply(msg, err))
+  }
+}
+
+
+const parseTxt = txt => {
+  const idx = txt.indexOf(' ')
+  if (idx < 0) {
+    return [ txt.slice(1), '' ]
+  }
+  return [ txt.slice(1, idx), txt.slice(idx).trim() ]
+}
 
 bot.on('message', msg => {
   const txt = msg.content
-  console.log(msg.author)
-  if (msg.author.id === '199939097140264961') return
+  if (txt[0] !== '!') return
+  const [ key, args ] = parseTxt(txt)
+  console.log({  key, args })
+  const match = actions[key]
+  if (!match) return
 
-  const action = actions[txt.slice(1).trim()]
-  if (!action) return
-  action(msg)
+  if (match.if) {
+    for (let f of match.if) {
+      if (!f(msg)) return
+    }
+  }
+
+  match.action(msg, args, key)
 })
