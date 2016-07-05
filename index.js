@@ -20,9 +20,12 @@ const config = {
 }
 
 const bot = new Eris(config.botToken)
+const shard = new Eris.Shard
+
 
 bot.on("ready", () => {
   console.log("Ready!")
+  shard.connect()
 })
 
 const voices = {
@@ -31,18 +34,16 @@ const voices = {
 
 const getVoiceConnection = msg => {
   const channelID = msg.channel.id
-  const vc = voices[channelID] || (voices[channelID] = new Eris.VoiceConnection(channelID))
+  const vc = voices[channelID] || (voices[channelID] = new Eris.VoiceConnection(channelID, shard))
   vc.converterCommand = 'ffmpeg'
   return vc
 }
-
-console.log(pathJoin(__dirname, 'balek.mp3'))
 
 const actions = {
   wesh: msg => bot.createMessage(msg.channel.id, "wesh"),
   help: msg => {
     const vc = getVoiceConnection(msg)
-    vc.on('error', err => bot.createMessage(msg.channel.id, err.stack))
+    vc.on('error', console.log)
     vc.playFile(pathJoin(__dirname, 'balek.mp3'), { waitForever: true })
   },
 }
