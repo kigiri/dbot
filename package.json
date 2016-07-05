@@ -1,0 +1,24 @@
+{
+  "name": "dbot",
+  "version": "1.0.0",
+  "description": "discord bot test",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kigiri/dbot.git"
+  },
+  "keywords": [],
+  "author": "Clément Denis <le.mikmac@gmail.com> (http://cdenis.net)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kigiri/dbot/issues"
+  },
+  "homepage": "https://github.com/kigiri/dbot#readme",
+  "dependencies": {
+    "eris": "github:abalabahaha/eris",
+    "tldr": "^1.6.0"
+  }
+}
