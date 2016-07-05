@@ -1,9 +1,10 @@
-"use strict"
+'use strict'
 // http://localhost:7651
 // https://discordapp.com/oauth2/authorize?&client_id=199938847948275714&scope=bot
+const _ = require('lodash-fp')
 const pathJoin = require('path').join
-const ChildProcess = require("child_process")
-const Eris = require('eris')
+const ChildProcess = require('child_process')
+const discord = require('discord.js')
 // const tldr = require('tldr')
 
 // tldr.list = /* singleColumn */
@@ -16,49 +17,47 @@ const Eris = require('eris')
 // tldr.updateCache = 
 
 const config = {
-  botToken: "MTk5OTM5MDk3MTQwMjY0OTYx.Cl1_Sw.KLm2QHRZrqorokHkSsUzbbyZAcU"
+  botToken: 'MTk5OTM5MDk3MTQwMjY0OTYx.Cl1_Sw.KLm2QHRZrqorokHkSsUzbbyZAcU'
 }
 
-const bot = new Eris(config.botToken)
-const shard = new Eris.Shard(1, bot)
+// connecting and playing a file
+// client.joinVoiceChannel(voiceChannel).then(function (connection) {
+//   connection.playFile(fileName)
+// })
 
+// // accessing an existing connection
+// if (client.voiceConnection) {
+//   client.voiceConnection.stopPlaying()
+// }
 
-bot.on("ready", () => {
-  console.log("Ready!")
-  shard.connect()
-})
+const bot = new discord.Client()
+bot.loginWithToken(config.botToken)
 
-const voices = {
-  
-}
+const voices = {}
 
-const getVoiceConnection = msg => {
-  const channelID = msg.channel.id
-  const vc = voices[channelID] || (voices[channelID] = new Eris.VoiceConnection(channelID, shard))
-  vc.converterCommand = 'ffmpeg'
-  return vc
-}
+const getVoiceConnection = voiceChannel =>
+  voices[voiceChannel]
+  || (voices[voiceChannel] = bot.joinVoiceChannel(voiceChannel))
 
 const actions = {
-  wesh: msg => bot.createMessage(msg.channel.id, "wesh"),
+  wesh: msg => bot.reply(msg, 'wesh'),
   help: msg => {
-    const vc = getVoiceConnection(msg)
-    vc.on('error', console.log)
-    vc.playFile(pathJoin(__dirname, 'balek.mp3'), { waitForever: true })
+    const voiceChannel = msg.author.voiceChannel
+    if (!voiceChannel) return bot.reply(msg, 'balek')
+    getVoiceConnection(voiceChannel.id)
+      .then(connection => connection.playFile(pathJoin(__dirname, 'balek.mp3')))
+      .catch(err => bot.reply(msg, err))
   },
 }
 
 let i = 0
-bot.on("messageCreate", msg => {
-  // console.log(msg)
-  const txt = msg.content
 
+bot.on('message', msg => {
+  const txt = msg.content
+  console.log(msg.author)
   if (msg.author.id === '199939097140264961') return
 
-  if (txt[0] !== '!') return bot.createMessage(msg.channel.id, txt + ' lol ' + (++i))
   const action = actions[txt.slice(1).trim()]
   if (!action) return
   action(msg)
 })
-// tldr.list('ls')
-bot.connect()

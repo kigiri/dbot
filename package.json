@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/kigiri/dbot#readme",
   "dependencies": {
+    "discord.js": "^8.0.0",
     "eris": "github:abalabahaha/eris",
+    "lodash-fp": "^0.10.4",
     "tldr": "^1.6.0"
   }
 }
