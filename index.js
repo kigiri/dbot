@@ -42,7 +42,7 @@ const actions = {
   wesh: msg => bot.createMessage(msg.channel.id, "wesh"),
   help: msg => {
     const vc = getVoiceConnection(msg)
-    vc.on('error', err => bot.createMessage(msg.channel.id, err.toString()))
+    vc.on('error', err => bot.createMessage(msg.channel.id, err.stack))
     vc.playFile(pathJoin(__dirname, 'balek.mp3'), { waitForever: true })
   },
 }
