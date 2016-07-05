@@ -20,7 +20,7 @@ const config = {
 }
 
 const bot = new Eris(config.botToken)
-const shard = new Eris.Shard
+const shard = new Eris.Shard(1, bot)
 
 
 bot.on("ready", () => {
