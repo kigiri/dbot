@@ -20,6 +20,8 @@
   "dependencies": {
     "discord.js": "^8.0.0",
     "eris": "github:abalabahaha/eris",
+    "google": "^2.1.0",
+    "google-images": "^2.0.0",
     "lodash-fp": "^0.10.4",
     "tldr": "^1.6.0"
   }
